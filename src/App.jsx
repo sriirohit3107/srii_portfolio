@@ -52,34 +52,24 @@ function NeuralRain() {
     const ctx = c.getContext("2d"); let id;
     const resize = () => { c.width = window.innerWidth; c.height = window.innerHeight; };
     resize(); window.addEventListener("resize", resize);
-
-    // Neural nodes
     const nodes = Array.from({ length: 40 }, () => ({
       x: Math.random() * c.width, y: Math.random() * c.height,
       vx: (Math.random() - .5) * .2, vy: (Math.random() - .5) * .2,
       r: Math.random() * 2 + 1, col: Math.random() > .5 ? [6,182,212] : [16,185,129],
       pulse: Math.random() * Math.PI * 2
     }));
-
-    // Digital rain columns
     const fontSize = 12;
     const cols = Math.ceil(c.width / fontSize);
     const drops = Array.from({ length: cols }, () => -Math.random() * 100);
     const chars = "01アイウエオカキクケコ∑∫∂∇λσμ";
-
     const draw = () => {
-      // Semi-transparent clear for rain trail effect
       ctx.fillStyle = "rgba(3,3,6,.06)";
       ctx.fillRect(0, 0, c.width, c.height);
-
-      // Digital rain
       ctx.font = `${fontSize}px JetBrains Mono, monospace`;
       for (let i = 0; i < drops.length; i++) {
-        if (Math.random() > .97) { // sparse rain
+        if (Math.random() > .97) {
           const char = chars[Math.floor(Math.random() * chars.length)];
-          const x = i * fontSize;
-          const y = drops[i] * fontSize;
-          // Gradient: cyan at head, fades
+          const x = i * fontSize, y = drops[i] * fontSize;
           const alpha = .08 + Math.random() * .06;
           ctx.fillStyle = Math.random() > .5 ? `rgba(6,182,212,${alpha})` : `rgba(16,185,129,${alpha})`;
           ctx.fillText(char, x, y);
@@ -87,45 +77,30 @@ function NeuralRain() {
         drops[i] += .3;
         if (drops[i] * fontSize > c.height && Math.random() > .99) drops[i] = 0;
       }
-
-      // Neural nodes and connections
       const now = Date.now() * .001;
       nodes.forEach((n, i) => {
         n.x += n.vx; n.y += n.vy;
         if (n.x < 0) n.x = c.width; if (n.x > c.width) n.x = 0;
         if (n.y < 0) n.y = c.height; if (n.y > c.height) n.y = 0;
-
-        // Pulsing glow
         const pulse = .4 + Math.sin(now * 1.5 + n.pulse) * .2;
         ctx.beginPath(); ctx.arc(n.x, n.y, n.r + 2, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${n.col.join(",")},${pulse * .15})`;
-        ctx.fill();
+        ctx.fillStyle = `rgba(${n.col.join(",")},${pulse * .15})`; ctx.fill();
         ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${n.col.join(",")},${pulse})`;
-        ctx.fill();
-
-        // Connections
+        ctx.fillStyle = `rgba(${n.col.join(",")},${pulse})`; ctx.fill();
         for (let j = i + 1; j < nodes.length; j++) {
           const dx = n.x - nodes[j].x, dy = n.y - nodes[j].y, dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < 160) {
-            // Data packet animation along connection
             const progress = ((now * 30 + i * 50) % 100) / 100;
             ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(nodes[j].x, nodes[j].y);
-            ctx.strokeStyle = `rgba(${n.col.join(",")},${.1 * (1 - dist / 160)})`;
-            ctx.lineWidth = .5; ctx.stroke();
-
-            // Travelling data packet dot
+            ctx.strokeStyle = `rgba(${n.col.join(",")},${.1 * (1 - dist / 160)})`; ctx.lineWidth = .5; ctx.stroke();
             if (dist < 100 && Math.random() > .98) {
-              const px = n.x + (nodes[j].x - n.x) * progress;
-              const py = n.y + (nodes[j].y - n.y) * progress;
+              const px = n.x + (nodes[j].x - n.x) * progress, py = n.y + (nodes[j].y - n.y) * progress;
               ctx.beginPath(); ctx.arc(px, py, 1.5, 0, Math.PI * 2);
-              ctx.fillStyle = `rgba(${n.col.join(",")},.6)`;
-              ctx.fill();
+              ctx.fillStyle = `rgba(${n.col.join(",")},.6)`; ctx.fill();
             }
           }
         }
       });
-
       id = requestAnimationFrame(draw);
     };
     draw();
@@ -134,7 +109,6 @@ function NeuralRain() {
   return <canvas ref={ref} className="fixed inset-0 pointer-events-none z-0" style={{ opacity: .8 }} />;
 }
 
-// ──── TYPING EFFECT ────
 function TypeWriter({ words, className }) {
   const [idx, setIdx] = useState(0);
   const [text, setText] = useState("");
@@ -150,7 +124,6 @@ function TypeWriter({ words, className }) {
   return <span className={className}>{text}<span className="cursor-blink text-cyan-400 ml-0.5">▊</span></span>;
 }
 
-// ──── CURSOR GLOW ────
 function CursorGlow() {
   const [p, setP] = useState({ x: -999, y: -999 });
   useEffect(() => { const fn = e => setP({ x: e.clientX, y: e.clientY }); window.addEventListener("mousemove", fn); return () => window.removeEventListener("mousemove", fn); }, []);
@@ -165,7 +138,7 @@ function MBtn({ children, className, href, ...props }) {
   return <Tag ref={ref} href={href} className={`clickable ${className}`} onMouseMove={move} onMouseLeave={() => setO({ x: 0, y: 0 })} style={{ transform: `translate(${o.x}px,${o.y}px)`, transition: "transform .3s cubic-bezier(.23,1,.32,1)" }} {...props}>{children}</Tag>;
 }
 
-// ──── BOOT SEQUENCE OVERLAY ────
+// ──── BOOT SEQUENCE ────
 function BootSequence() {
   const [visible, setVisible] = useState(true);
   const [lines, setLines] = useState([]);
@@ -178,21 +151,14 @@ function BootSequence() {
     "[SYS] Portfolio rendering complete.",
     "[SYS] Welcome."
   ];
-
   useEffect(() => {
     let i = 0;
     const interval = setInterval(() => {
-      if (i < bootLines.length) {
-        setLines(prev => [...prev, bootLines[i]]);
-        i++;
-      } else {
-        clearInterval(interval);
-        setTimeout(() => setVisible(false), 600);
-      }
+      if (i < bootLines.length) { setLines(prev => [...prev, bootLines[i]]); i++; }
+      else { clearInterval(interval); setTimeout(() => setVisible(false), 600); }
     }, 180);
     return () => clearInterval(interval);
   }, []);
-
   if (!visible) return null;
   return (
     <div className={`fixed inset-0 z-[100] bg-[#030306] flex items-center justify-center transition-opacity duration-500 ${lines.length >= bootLines.length ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
@@ -203,9 +169,7 @@ function BootSequence() {
         </div>
         <div className="space-y-1.5">
           {lines.map((line, i) => (
-            <div key={i} className="font-mono text-xs tracking-wide" style={{ color: line.includes("✓") ? "#10b981" : line.includes("Welcome") ? "#06b6d4" : "rgba(255,255,255,.45)" }}>
-              {line}
-            </div>
+            <div key={i} className="font-mono text-xs tracking-wide" style={{ color: line.includes("✓") ? "#10b981" : line.includes("Welcome") ? "#06b6d4" : "rgba(255,255,255,.45)" }}>{line}</div>
           ))}
           {lines.length < bootLines.length && <span className="inline-block w-2 h-3 bg-cyan-400 animate-pulse" />}
         </div>
@@ -350,7 +314,6 @@ function Hero() {
       <div className="absolute inset-0 opacity-[.015]" style={{ backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`, backgroundSize: "60px 60px" }} />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full opacity-[.06]" style={{ background: "radial-gradient(circle, rgba(6,182,212,.4), transparent 55%)", animation: "pulse-slow 6s ease-in-out infinite" }} />
       <div className="absolute inset-0 noise-overlay pointer-events-none" />
-
       <div className="relative z-10 max-w-7xl mx-auto px-6 pt-32 pb-8 w-full">
         <FadeIn>
           <div className="flex flex-wrap gap-3 mb-8">
@@ -359,7 +322,6 @@ function Hero() {
             ))}
           </div>
         </FadeIn>
-
         <FadeIn delay={100}>
           <h1 className="hero-title text-6xl sm:text-8xl lg:text-[8rem] text-white leading-[.85] tracking-tighter">
             <span className="glitch-text" data-text="Srii Rohit">Srii Rohit</span><br />
@@ -369,7 +331,6 @@ function Hero() {
             </span>
           </h1>
         </FadeIn>
-
         <FadeIn delay={200}>
           <div className="mt-10 max-w-2xl">
             <TypeWriter words={["AI/ML Engineer & Data Scientist","Healthcare AI Researcher","Battery Analytics Engineer","Full-Stack AI Developer"]} className="text-white font-extrabold text-xl sm:text-2xl" />
@@ -378,7 +339,6 @@ function Hero() {
             </p>
           </div>
         </FadeIn>
-
         <FadeIn delay={300}>
           <div className="mt-12 flex flex-wrap gap-4">
             <MBtn href="#Projects" className="group px-8 py-4 rounded-full bg-white text-[#030306] text-sm font-black tracking-wide shadow-xl shadow-white/10 flex items-center gap-2 hover:shadow-white/25 transition-shadow">
@@ -387,7 +347,6 @@ function Hero() {
             <MBtn href="#Experience" className="px-8 py-4 rounded-full border-2 border-white/20 text-white/75 text-sm font-bold tracking-wide hover:bg-white/5 hover:border-white/35 transition-all">MY EXPERIENCE</MBtn>
           </div>
         </FadeIn>
-
         <FadeIn delay={450}>
           <div className="mt-24 grid grid-cols-2 sm:grid-cols-4 gap-8 border-t border-white/[.07] pt-10">
             {[{ end:"40",suf:"M+",label:"Patient Records Analyzed" },{ end:"1.78",suf:"M+",label:"Battery Records Processed" },{ end:"0.85",suf:"",label:"AUC Cancer Prediction" },{ end:"2",suf:"",label:"Publications" }].map((s,i) => (
@@ -491,14 +450,14 @@ function Experience() {
   );
 }
 
-// ──── PROJECTS (with data overlay metrics on hover) ────
+// ──── PROJECTS ────
 const projects = [
-  { title:"Cancer Metastasis Prediction",tag:"healthcare",tagLabel:"HEALTHCARE AI",desc:"Neural network analyzing 40M+ NIS records predicting colon cancer metastasis. AUC 0.85 with causal inference (PSM, IPW).",tech:["PyTorch","Pandas","SQL","Causal Inference"],metric:"AUC 0.85",icon:"🔬",overlay:{ acc:"85.3%", inf:"34ms", data:"40.2M rows", f1:"0.81" } },
-  { title:"Smart Battery Analytics",tag:"energy",tagLabel:"BATTERY TECH",desc:"Pipeline processing 1.78M+ records via Airflow ETL. Deep learning on 399K+ cycles. Anomaly detection 180s before failure.",tech:["Airflow","PostgreSQL","Deep Learning","Python"],metric:"1.78M+",icon:"🔋",overlay:{ acc:"97.1%", inf:"8ms", data:"1.78M rows", f1:"0.94" } },
-  { title:"Budget Brain",tag:"ai",tagLabel:"FULL-STACK AI",desc:"AI ad budget optimizer with Monte Carlo simulating CPM/CTR/CVR. P10-P90 confidence intervals across 4 platforms.",tech:["FastAPI","React","Gemini API","Monte Carlo"],metric:"4 Platforms",icon:"💡",overlay:{ acc:"92.7%", inf:"120ms", data:"48K sims", f1:"N/A" } },
-  { title:"HopeLink RAG System",tag:"healthcare",tagLabel:"HEALTHCARE AI",desc:"Retrieval-Augmented LLM for patient-centered cancer info. Bridges oncology research with accessible communication.",tech:["LangChain","RAG","NLP","Python"],metric:"Submitted",icon:"🩺",overlay:{ acc:"91.4%", inf:"1.2s", data:"12K docs", f1:"0.88" } },
-  { title:"Graph Course Recommender",tag:"ai",tagLabel:"EXPLAINABLE AI",desc:"Heterogeneous academic graph (1K+ students, 200+ courses) with XAI for interpretable recommendations.",tech:["PyTorch Geometric","NetworkX","MongoDB"],metric:"1K+ Nodes",icon:"🕸️",overlay:{ acc:"89.6%", inf:"22ms", data:"1.2K nodes", f1:"0.83" } },
-  { title:"SmartFinancial AI",tag:"ai",tagLabel:"LLM + LSTM",desc:"AI stock advisor with LSTM + LangChain + GPT-4 generating Buy/Sell/Hold through a conversational dashboard.",tech:["LSTM","LangChain","GPT-4","React"],metric:"Real-Time",icon:"📈",overlay:{ acc:"76.8%", inf:"45ms", data:"5Y OHLCV", f1:"0.72" } },
+  { title:"Cancer Metastasis Prediction",tag:"healthcare",tagLabel:"HEALTHCARE AI",desc:"Neural network analyzing 40M+ NIS records predicting colon cancer metastasis. AUC 0.85 with causal inference (PSM, IPW).",tech:["PyTorch","Pandas","SQL","Causal Inference"],metric:"AUC 0.85",icon:"🔬",overlay:{ acc:"85.3%",inf:"34ms",data:"40.2M rows",f1:"0.81" },live:null },
+  { title:"Smart Battery Analytics",tag:"energy",tagLabel:"BATTERY TECH",desc:"Pipeline processing 1.78M+ records via Airflow ETL. Deep learning on 399K+ cycles. Anomaly detection 180s before failure.",tech:["Airflow","PostgreSQL","Deep Learning","Python"],metric:"1.78M+",icon:"🔋",overlay:{ acc:"97.1%",inf:"8ms",data:"1.78M rows",f1:"0.94" },live:null },
+  { title:"Budget Brain",tag:"ai",tagLabel:"FULL-STACK AI",desc:"AI ad budget optimizer with Monte Carlo simulating CPM/CTR/CVR. P10-P90 confidence intervals across 4 platforms.",tech:["FastAPI","React","Gemini API","Monte Carlo"],metric:"4 Platforms",icon:"💡",overlay:{ acc:"92.7%",inf:"120ms",data:"48K sims",f1:"N/A" },live:"https://budget-brain-djxl.vercel.app/" },
+  { title:"HopeLink RAG System",tag:"healthcare",tagLabel:"HEALTHCARE AI",desc:"Retrieval-Augmented LLM for patient-centered cancer info. Bridges oncology research with accessible communication.",tech:["LangChain","RAG","NLP","Python"],metric:"Submitted",icon:"🩺",overlay:{ acc:"91.4%",inf:"1.2s",data:"12K docs",f1:"0.88" },live:"https://huggingface.co/spaces/Srii07/WebExp" },
+  { title:"Graph Course Recommender",tag:"ai",tagLabel:"EXPLAINABLE AI",desc:"Heterogeneous academic graph (1K+ students, 200+ courses) with XAI for interpretable recommendations.",tech:["PyTorch Geometric","NetworkX","MongoDB"],metric:"1K+ Nodes",icon:"🕸️",overlay:{ acc:"89.6%",inf:"22ms",data:"1.2K nodes",f1:"0.83" },live:"https://dsscourserecommendation.streamlit.app/" },
+  { title:"SmartFinancial AI",tag:"ai",tagLabel:"LLM + LSTM",desc:"AI stock advisor with LSTM + LangChain + GPT-4 generating Buy/Sell/Hold through a conversational dashboard.",tech:["LSTM","LangChain","GPT-4","React"],metric:"Real-Time",icon:"📈",overlay:{ acc:"76.8%",inf:"45ms",data:"5Y OHLCV",f1:"0.72" },live:null },
 ];
 const pTheme = { healthcare:"bg-cyan-500/15 text-cyan-300 border-cyan-500/30",energy:"bg-emerald-500/15 text-emerald-300 border-emerald-500/30",ai:"bg-violet-500/15 text-violet-300 border-violet-500/30" };
 const pGlow = { healthcare:"bg-cyan-500",energy:"bg-emerald-500",ai:"bg-violet-500" };
@@ -508,7 +467,6 @@ function ProjectCard({ p }) {
   return (
     <div className="group relative bg-white/[.03] border border-white/[.07] rounded-2xl p-6 hover:bg-white/[.07] hover:border-white/20 transition-all duration-500 h-full flex flex-col overflow-hidden cursor-crosshair"
       onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}>
-      {/* Blueprint grid */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" style={{ backgroundImage: "linear-gradient(rgba(6,182,212,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,.04) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
       <div className={`absolute -top-20 -right-20 w-40 h-40 rounded-full blur-3xl opacity-0 group-hover:opacity-25 transition-opacity duration-700 ${pGlow[p.tag]}`} />
 
@@ -529,12 +487,31 @@ function ProjectCard({ p }) {
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-emerald-400/80 text-[9px] font-mono font-bold tracking-wider">SYSTEM NOMINAL</span>
             </div>
+            {/* LIVE SITE BUTTON inside overlay */}
+            {p.live && (
+              <a href={p.live} target="_blank" rel="noopener noreferrer"
+                className="clickable inline-flex items-center gap-2 mt-5 px-5 py-2 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500 text-[#030306] text-[10px] font-black tracking-wider hover:scale-105 transition-transform shadow-lg shadow-cyan-500/30">
+                <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute h-full w-full rounded-full bg-[#030306]/40" /><span className="relative rounded-full h-1.5 w-1.5 bg-[#030306]" /></span>
+                VIEW LIVE SITE
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+              </a>
+            )}
           </div>
         </div>
       )}
 
       <div className="relative flex items-start justify-between gap-2 mb-4">
-        <div className="flex items-center gap-2.5"><span className="text-xl">{p.icon}</span><span className={`px-2.5 py-1 rounded-full text-[9px] font-black tracking-[.15em] border ${pTheme[p.tag]}`}>{p.tagLabel}</span></div>
+        <div className="flex items-center gap-2.5">
+          <span className="text-xl">{p.icon}</span>
+          <span className={`px-2.5 py-1 rounded-full text-[9px] font-black tracking-[.15em] border ${pTheme[p.tag]}`}>{p.tagLabel}</span>
+          {/* Live badge on card face */}
+          {p.live && (
+            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/25">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-emerald-300 text-[8px] font-mono font-black tracking-wider">LIVE</span>
+            </span>
+          )}
+        </div>
         <span className="text-white/30 text-[10px] font-mono font-black bg-white/[.05] px-2 py-1 rounded">{p.metric}</span>
       </div>
       <h3 className="relative text-white font-extrabold text-lg mb-3 group-hover:bg-gradient-to-r group-hover:from-cyan-400 group-hover:to-emerald-400 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-500">{p.title}</h3>
@@ -570,7 +547,7 @@ function Projects() {
   );
 }
 
-// ──── BENTO SKILLS ────
+// ──── BENTO SKILLS (fixed id to "Skills") ────
 const skills = [
   { title:"Programming",icon:"⌨️",items:["Python","SQL","JavaScript","Java","C++"],size:"col-span-1" },
   { title:"ML & AI",icon:"🧠",items:["PyTorch","PyTorch Geometric","Scikit-learn","Hugging Face","LangChain","RAG","LSTM"],size:"md:col-span-2" },
@@ -582,58 +559,30 @@ const skills = [
 
 function Skills() {
   const [hov, setHov] = useState(null);
-
   return (
-    <section id="skills" className="relative py-28 z-10">
+    <section id="Skills" className="relative py-28 z-10">
       <div className="max-w-7xl mx-auto px-6">
         <FadeIn>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-14 h-[2px] bg-gradient-to-r from-cyan-500 to-emerald-500" />
-            <h2 className="text-white font-mono text-sm tracking-widest uppercase">Technical Stack</h2>
-          </div>
+          <div className="flex items-center gap-3 mb-4"><div className="w-14 h-[2px] bg-gradient-to-r from-cyan-500 to-emerald-500" /><span className="text-white/55 text-xs font-black tracking-[.3em] uppercase font-mono">// SKILLS</span></div>
           <h2 className="section-heading text-3xl sm:text-5xl text-white mb-16">Tools & Technologies</h2>
         </FadeIn>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {skills.map((g, i) => (
             <FadeIn key={i} delay={i * 80} className={g.size || ""}>
-              <div 
-                className="relative bg-white/[.03] border border-white/[.08] rounded-2xl p-6 transition-all duration-500 cursor-default overflow-hidden group"
-                onMouseEnter={() => setHov(i)} 
-                onMouseLeave={() => setHov(null)}
-              >
-                {/* Background Glow on Hover */}
+              <div className={`relative bg-white/[.03] border border-white/[.08] rounded-2xl p-6 transition-all duration-500 cursor-default overflow-hidden group ${hov === i ? "bg-white/[.07] border-white/25 scale-[1.01]" : ""}`}
+                onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov(null)}>
                 <div className={`absolute inset-0 bg-gradient-to-br from-cyan-500/[.05] to-emerald-500/[.05] transition-opacity duration-500 ${hov === i ? 'opacity-100' : 'opacity-0'}`} />
-                
                 <div className="relative z-10">
                   <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">{g.icon}</span>
-                      <h3 className="text-white font-bold">{g.title}</h3>
-                    </div>
-                    {hov === i && (
-                      <span className="text-[9px] font-mono text-emerald-400/90 tracking-wider animate-pulse">
-                        SYSTEM_OPTIMAL
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2"><span className="text-xl">{g.icon}</span><h3 className="text-white font-extrabold text-sm font-mono tracking-wider uppercase">{g.title}</h3></div>
+                    {hov === i && <span className="text-[9px] font-mono text-emerald-400/90 tracking-wider animate-pulse font-bold">STATUS: OPTIMAL</span>}
                   </div>
-
-                  {/* Progress Bar / Skill Level Visual */}
                   <div className="h-1 bg-white/[.06] rounded-full mb-4 overflow-hidden">
-                    <div 
-                      className="h-full bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-1000" 
-                      style={{ width: hov === i ? '100%' : '30%' }}
-                    />
+                    <div className={`h-full bg-gradient-to-r from-cyan-500 to-emerald-500 rounded-full transition-all duration-700 ${hov === i ? "w-full" : "w-0"}`} />
                   </div>
-
                   <div className="flex flex-wrap gap-2">
-                    {g.items.map((s) => (
-                      <span 
-                        key={s} 
-                        className="px-3 py-1.5 bg-white/[.05] border border-white/[.05] rounded-lg text-[11px] font-mono text-white/70 group-hover:text-cyan-400 transition-colors"
-                      >
-                        {s}
-                      </span>
+                    {g.items.map((s, j) => (
+                      <span key={s} className={`px-3 py-1.5 bg-white/[.05] border border-white/[.05] rounded-lg text-[11px] font-mono font-bold transition-all duration-300 ${hov === i ? "text-cyan-300 bg-cyan-500/[.1] border-cyan-500/15" : "text-white/55"}`} style={{ transitionDelay: hov === i ? `${j * 40}ms` : "0ms" }}>{s}</span>
                     ))}
                   </div>
                 </div>
@@ -677,7 +626,7 @@ function Publications() {
   );
 }
 
-// ──── CONTACT ────
+// ──── CONTACT (with real LinkedIn & GitHub links) ────
 function Contact() {
   return (
     <section id="Contact" className="relative py-32 z-10">
@@ -705,12 +654,12 @@ function Contact() {
               </MBtn>
             </div>
             <div className="flex justify-center gap-5">
-              {[
-                { label:"LinkedIn",href: "https://www.linkedin.com/in/sriirohit/",icon:<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg> },
-                { label:"GitHub",href: "https://github.com/sriirohit3107", icon:<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg> },
-              ].map(l => (
-                <MBtn key={l.label} href="#" className="w-14 h-14 rounded-full bg-white/[.05] border border-white/[.08] flex items-center justify-center text-white/40 hover:text-white hover:bg-white/[.12] hover:border-white/25 transition-all duration-300" aria-label={l.label}>{l.icon}</MBtn>
-              ))}
+              <MBtn href="https://www.linkedin.com/in/sriirohit/" target="_blank" rel="noopener noreferrer" className="w-14 h-14 rounded-full bg-white/[.05] border border-white/[.08] flex items-center justify-center text-white/40 hover:text-white hover:bg-white/[.12] hover:border-white/25 transition-all duration-300" aria-label="LinkedIn">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              </MBtn>
+              <MBtn href="https://github.com/sriirohit3107" target="_blank" rel="noopener noreferrer" className="w-14 h-14 rounded-full bg-white/[.05] border border-white/[.08] flex items-center justify-center text-white/40 hover:text-white hover:bg-white/[.12] hover:border-white/25 transition-all duration-300" aria-label="GitHub">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+              </MBtn>
             </div>
           </div>
         </FadeIn>
@@ -737,50 +686,37 @@ function Footer() {
 function GlobalStyles() {
   return <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
-
-    /* Custom crosshair cursor */
     * { cursor: crosshair; }
     .clickable, .clickable * { cursor: pointer; }
-    /* Cyan glow on clickable hover via box-shadow trick on pseudo — simplified with outline */
     .clickable:hover { filter: drop-shadow(0 0 6px rgba(6,182,212,.25)); }
-
     .hero-title { font-family: 'Syne', sans-serif; font-weight: 800; }
     .section-heading { font-family: 'Syne', sans-serif; font-weight: 800; }
-
     @keyframes pulse-slow { 0%,100% { transform:translate(-50%,-50%) scale(1); opacity:.06; } 50% { transform:translate(-50%,-50%) scale(1.15); opacity:.12; } }
     @keyframes marquee { 0% { transform:translateX(0); } 100% { transform:translateX(-33.33%); } }
     .marquee-scroll { animation: marquee 35s linear infinite; }
     @keyframes ticker { 0% { transform:translateX(0); } 100% { transform:translateX(-33.33%); } }
     .ticker-scroll { animation: ticker 25s linear infinite; }
-
     .scanline-overlay { background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(6,182,212,.012) 2px, rgba(6,182,212,.012) 4px); }
     .scanline-overlay::after { content:""; position:absolute; top:0; left:0; right:0; height:2px; background:rgba(6,182,212,.07); animation:scanline 8s linear infinite; }
     @keyframes scanline { 0% { top:-2px; } 100% { top:100%; } }
-
     .noise-overlay { opacity:.025; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-
     .glitch-text { position:relative; }
     .glitch-text::before,.glitch-text::after { content:attr(data-text); position:absolute; top:0; left:0; opacity:0; }
     .glitch-text:hover::before { opacity:.5; color:#06b6d4; clip-path:inset(20% 0 40% 0); animation:glitch1 .3s linear; }
     .glitch-text:hover::after { opacity:.5; color:#10b981; clip-path:inset(60% 0 10% 0); animation:glitch2 .3s linear; }
     @keyframes glitch1 { 0%{transform:translate(0)} 25%{transform:translate(-3px,1px)} 50%{transform:translate(3px,-1px)} 75%{transform:translate(-1px,2px)} 100%{transform:translate(0)} }
     @keyframes glitch2 { 0%{transform:translate(0)} 25%{transform:translate(3px,-1px)} 50%{transform:translate(-3px,2px)} 75%{transform:translate(1px,-2px)} 100%{transform:translate(0)} }
-
     .ecg-anim { animation:ecg-scroll 3s linear infinite; }
     @keyframes ecg-scroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
-
     .fi { opacity:0; transform:translateY(2rem); transition:opacity .7s ease-out, transform .7s ease-out; }
     .fi-visible { opacity:1; transform:translateY(0); }
-
     .cursor-blink { animation:blink .8s step-end infinite; }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-
     .data-overlay-in { animation:overlayIn .3s ease-out; }
     @keyframes overlayIn { 0%{opacity:0;backdrop-filter:blur(0)} 100%{opacity:1;backdrop-filter:blur(4px)} }
   `}</style>;
 }
 
-// ──── MAIN ────
 export default function Portfolio() {
   const active = useScrollSpy(SECTIONS);
   return (
