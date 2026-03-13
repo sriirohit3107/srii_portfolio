@@ -290,7 +290,7 @@ function Nav({ active }) {
             </a>
           ))}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 mr-30">
           <MBtn href="mailto:sprakash1@binghamton.edu" className="hidden sm:flex px-5 py-2.5 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500 text-[#030306] text-xs font-black shadow-lg shadow-cyan-500/30 items-center gap-2 tracking-wide">
             <span className="relative flex h-2 w-2"><span className="animate-ping absolute h-full w-full rounded-full bg-[#030306]/50" /><span className="relative rounded-full h-2 w-2 bg-[#030306]" /></span>
             OPEN TO WORK
@@ -349,7 +349,7 @@ function Hero() {
         </FadeIn>
         <FadeIn delay={450}>
           <div className="mt-24 grid grid-cols-2 sm:grid-cols-4 gap-8 border-t border-white/[.07] pt-10">
-            {[{ end:"40",suf:"M+",label:"Patient Records Analyzed" },{ end:"1.78",suf:"M+",label:"Battery Records Processed" },{ end:"0.85",suf:"",label:"AUC Cancer Prediction" },{ end:"2",suf:"",label:"Publications" }].map((s,i) => (
+            {[{ end:"40",suf:"M+",label:"Patient Records Analyzed" },{ end:"1.78",suf:"M+",label:"Battery Records Processed" },{ end:"0.85",suf:"",label:"AUC Cancer Prediction" },{ end:"4",suf:"",label:"Publications" }].map((s,i) => (
               <div key={i} className="group cursor-default">
                 <div className="text-4xl sm:text-5xl font-black font-mono bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent group-hover:scale-105 transition-transform origin-left"><Counter end={s.end} suffix={s.suf} /></div>
                 <div className="text-white/45 text-xs mt-2 font-bold tracking-wider uppercase">{s.label}</div>
@@ -605,14 +605,15 @@ function Publications() {
         <div className="space-y-5">
           {[
             { title:"Older Age Does Not Increase Inpatient Length of Stay and Total Charges After Pancreatectomy",venue:"Cancer Treatment and Research Communications",status:"Under Review",tag:"healthcare" },
-            { title:"HopeLink: Retrieval-Augmented LLM System for Patient-Centered Cancer Information",venue:"Journal of Clinical Medicine",status:"Submitted",tag:"healthcare" },
+            { title:"HopeLink: Retrieval-Augmented LLM System for Patient-Centered Cancer Information",venue:"Journal of Clinical Medicine , IISE Annual Conference - 2026 ",status:"Submitted",tag:"healthcare" },
+            {title : "AI Enabled SoH Modeling: A Novel Process for Second Life Li ion Battery Energy Storage",venue:"New York Battery and Energy Storage Technology Consortium - 2025",status:"Published",tag:"Battery" },
             { title:"Real-Time Detection of Denial of Service (DoS) Attacks",venue:"Futuristic Trends in Information Technology",status:"Published",tag:"security" },
           ].map((pub,i) => (
             <FadeIn key={i} delay={i * 100}>
               <div className="group bg-white/[.03] border border-white/[.07] rounded-2xl p-6 hover:bg-white/[.06] hover:border-white/20 transition-all duration-500 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-cyan-500 to-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full" />
                 <div className="flex flex-wrap items-center gap-2 mb-3">
-                  <span className={`px-3 py-1 rounded-full text-[9px] font-black tracking-[.15em] border ${pub.tag === "healthcare" ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/30" : "bg-amber-500/15 text-amber-300 border-amber-500/30"}`}>{pub.tag === "healthcare" ? "HEALTHCARE" : "SECURITY"}</span>
+                  <span className={`px-3 py-1 rounded-full text-[9px] font-black tracking-[.15em] border ${pub.tag === "healthcare" ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/30": pub.tag === "security"? "bg-amber-500/15 text-amber-300 border-amber-500/30": "bg-green-500/15 text-green-300 border-green-500/30"}`} > {pub.tag === "healthcare"? "HEALTHCARE": pub.tag === "security"? "SECURITY" : "ENERGY"} </span>
                   <span className={`px-3 py-1 rounded-full text-[9px] font-black tracking-[.15em] border font-mono ${pub.status === "Published" ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" : "bg-white/[.06] text-white/45 border-white/[.1]"}`}>{pub.status.toUpperCase()}</span>
                 </div>
                 <h3 className="text-white font-bold text-base mb-1.5 leading-snug group-hover:bg-gradient-to-r group-hover:from-cyan-400 group-hover:to-emerald-400 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-500">{pub.title}</h3>
